@@ -66,7 +66,7 @@ start-prod.bat
 ---
 ## ✅ Requirement Coverage
 
-This project meets **all 7 key requirements**:
+This project meets **all 7 + **1** key requirements**:
 
 | # | Requirement              | Status | Description                                                                             |
 |---|--------------------------| ------ |-----------------------------------------------------------------------------------------|
