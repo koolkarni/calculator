@@ -10,7 +10,7 @@ A simple Spring Boot-based calculator app with UI and API support, Redis-backed 
 * **Parallel threaded calculations via API**
 * Redis integration for storing calculation history
 * OpenTelemetry tracing with Jaeger
-* Docker & Docker Compose support for **_local and production_**
+* Docker & Docker Compose support for ***local and production***
 
 ---
 
@@ -70,6 +70,13 @@ start-prod.bat
 
 ---
 
+## 🧪 Postman Tests
+
+Import the full test suite covering all APIs and edge cases:
+👉 [calculator\_api\_tests\_full.postman\_collection.json](https://github.com/koolkarni/calculator/blob/main/postman/calculator_api_tests_full.postman_collection.json)
+
+---
+
 ## 🧼 Cleanup
 
 ```bash
@@ -82,13 +89,16 @@ Or for prod:
 docker compose -f docker-compose.prod.yml down --volumes
 ```
 
-### 🔮 Future Scope
+---
+
+## 🔮 Future Scope
 
 * Add GraphQL controller to support more flexible queries
 * Replace Thymeleaf UI with a modern React frontend
 * Add Prometheus/Grafana for monitoring metrics
 * Add AI for calculation suggestions or results
-Support JWT-based authentication for APIs
+* Support JWT-based authentication for APIs
+
 ---
 
 ## 📝 License
