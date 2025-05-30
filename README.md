@@ -69,7 +69,7 @@ start-prod.bat
 This project meets **all 7 key requirements**:
 
 | # | Requirement              | Status | Description                                                                             |
-| - | ------------------------ | ------ | --------------------------------------------------------------------------------------- |
+|---|--------------------------| ------ |-----------------------------------------------------------------------------------------|
 | 1 | Enum for operations      | ✅      | `Operation.java` defines `ADD`, `SUBTRACT`, `MULTIPLY`, `DIVIDE`                        |
 | 2 | Basic calculation method | ✅      | `Calculator.calculate()` method handles single operations                               |
 | 3 | Chaining operations      | ✅      | Supports sequential and threaded chains via `Calculator.chain` and `chainInParallel()`  |
@@ -77,6 +77,7 @@ This project meets **all 7 key requirements**:
 | 5 | IoC compatibility        | ✅      | Follows Spring Boot IoC principles with `@Component` and `@Service`                     |
 | 6 | Error handling           | ✅      | `GlobalExceptionHandler` handles known and unknown exceptions with custom JSON response |
 | 7 | Testing                  | ✅      | Includes JUnit tests and comprehensive Postman test collection                          |
+| 8 | thread support           | ✅      | Parrell processing of operations                                                        |
 
 ---
 ## 📦 Output
