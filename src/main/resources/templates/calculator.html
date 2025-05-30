@@ -161,27 +161,25 @@
 
         <div class="space-y-4">
             <div th:each="entry : ${history}" class="p-4 border rounded-lg hover:shadow transition">
-                <!-- Single Calculation Entry -->
-                <div th:if="${entry.type.name() == 'SINGLE'}" class="single-calculation">
+                <div th:if="${entry.input instanceof T(com.ebay.calculator.calculator.dto.SingleCalcRequest)}"
+                     class="single-calculation">
                     <div class="flex items-center justify-between">
                         <div class="flex items-center space-x-4">
-                            <div class="text-lg font-semibold"
-                                 th:text="${entry.input.num1} + ' ' + ${entry.input.operation} + ' ' + ${entry.input.num2}"></div>
+                            <div class="text-lg font-semibold" th:text="${entry.input.num1} + ' ' + ${entry.input.operation} + ' ' + ${entry.input.num2}"></div>
                             <span class="text-blue-600 font-bold">= <span th:text="${entry.result}"></span></span>
                         </div>
-                        <span class="text-sm text-gray-500" th:text="${#temporals.format(entry.timestamp, 'MMM dd, yyyy HH:mm')}"></span>
+                        <span class="text-sm text-gray-500" th:text="${#temporals.format(#temporals.parse(entry.timestamp), 'MMM dd, yyyy HH:mm')}"></span>
                     </div>
                 </div>
 
-                <!-- Chain Calculation Entry -->
-            <div th:if="${entry.type.name() == 'CHAIN'}" class="chain-calculation">
-                <div th:if="${entry.input.getClass().simpleName == 'ChainRequest'}" class="chain-calculation">
+                <div th:if="${entry.input instanceof T(com.ebay.calculator.calculator.dto.ChainRequest)}"
+                     class="chain-calculation">
                     <div class="flex justify-between items-start mb-2">
                         <div>
                             <span class="font-semibold">Initial Value: </span>
                             <span th:text="${entry.input.initial}"></span>
                         </div>
-                        <span class="text-sm text-gray-500" th:text="${#temporals.format(entry.timestamp, 'MMM dd, yyyy HH:mm')}"></span>
+                        <span class="text-sm text-gray-500" th:text="${#temporals.format(#temporals.parse(entry.timestamp), 'MMM dd, yyyy HH:mm')}"></span>
                     </div>
 
                     <div class="ml-4 space-y-2">
@@ -198,7 +196,6 @@
                         <span class="text-blue-600 font-bold" th:text="${entry.result}"></span>
                     </div>
                 </div>
-            </div>
             </div>
         </div>
     </div>

@@ -31,7 +31,7 @@ public class CalculatorRestController {
     public double chain(@RequestBody ChainRequest request) {
         log.info("Sequential chain request: {}", request);
         double result = calculator.chain(request.getInitial(), request.getOperations(), request.getValues());
-        historyService.saveHistory(request, result);
+        historyService.saveHistory("calculator:history", request, result);
         return result;
     }
 
