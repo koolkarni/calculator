@@ -3,6 +3,9 @@
 A simple Spring Boot-based calculator app with UI and API support, Redis-backed history, and distributed tracing via Jaeger. Supports both local and production Docker environments.
 
 ---
+# ![eBay Calculator Logo](https://raw.githubusercontent.com/koolkarni/calculator/main/images/logo.png)
+![img.png](images/img.png)
+
 
 ## ✅ Features
 
