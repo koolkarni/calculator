@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>eBay Calculator</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        .calculator-bg {
+            background-color: #f8fafc;
+        }
+        .operation-btn {
+            transition: all 0.2s ease-in-out;
+        }
+        .operation-btn:hover {
+            transform: translateY(-2px);
+        }
+        .chain-row {
+            transition: background-color 0.2s;
+        }
+        .chain-row:hover {
+            background-color: #f0f4ff;
+        }
+        .input-error {
+            border-color: #f87171;
+        }
+        .input-error:focus {
+            border-color: #f87171;
+            ring-color: #f87171;
+        }
+    </style>
+</head>
+<body class="calculator-bg min-h-screen">
+<nav class="bg-blue-600 text-white shadow-lg">
+    <div class="container mx-auto px-4 py-3 flex justify-between items-center">
+        <h1 class="text-xl font-bold">eBay Calculator</h1>
+        <div class="space-x-4">
+            <a href="/ui" class="hover:text-blue-200 transition"><i class="fas fa-calculator mr-1"></i> Calculator</a>
+            <a href="/ui/history" class="hover:text-blue-200 transition"><i class="fas fa-history mr-1"></i> History</a>
+        </div>
+    </div>
+</nav>
+
+<main class="container mx-auto px-4 py-8">
+    <!-- Error Display -->
+    <div th:if="${error != null}" class="mb-6 p-4 bg-red-100 border-l-4 border-red-500 text-red-700 rounded">
+        <div class="flex items-center">
+            <i class="fas fa-exclamation-circle mr-2"></i>
+            <span th:text="${error}"></span>
+        </div>
+    </div>
+
+    <!-- Result Display -->
+    <div th:if="${calculationResult != null}" class="mb-6 p-4 bg-green-100 border-l-4 border-green-500 text-green-700 rounded">
+        <div class="flex items-center">
+            <i class="fas fa-check-circle mr-2"></i>
+            <span class="font-semibold">Result: </span>
+            <span th:text="${singleRequest.num1} + ' ' +
+                      ${singleRequest.operation} + ' ' +
+                      ${singleRequest.num2} + ' = ' +
+                      ${calculationResult}"></span>
+        </div>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        <!-- Single Calculation Form -->
+        <div class="bg-white rounded-xl shadow-md overflow-hidden p-6">
+            <h2 class="text-2xl font-bold text-gray-800 mb-6 text-center">Single Operation</h2>
+            <form id="singleCalcForm" th:action="@{/ui/single}" method="post" th:object="${singleRequest}" class="space-y-4">
+                <div>
+                    <label class="block text-gray-700 text-sm font-bold mb-2" for="num1">First Number <span class="text-red-500">*</span></label>
+                    <input type="number" th:field="*{num1}" id="num1" placeholder="Enter number" step="any" required
+                           class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    <p id="num1Error" class="hidden text-red-500 text-xs mt-1">Please enter a valid number</p>
+                </div>
+
+                <div>
+                    <label class="block text-gray-700 text-sm font-bold mb-2">Operation <span class="text-red-500">*</span></label>
+                    <div class="grid grid-cols-2 gap-2" id="operationGroup">
+                        <label class="operation-btn flex items-center space-x-2 p-2 border rounded-md hover:bg-blue-50 cursor-pointer bg-blue-50">
+                            <input type="radio" name="operation" value="ADD" class="text-blue-500" checked>
+                            <span>Add (+)</span>
+                        </label>
+                        <label class="operation-btn flex items-center space-x-2 p-2 border rounded-md hover:bg-blue-50 cursor-pointer">
+                            <input type="radio" name="operation" value="SUBTRACT" class="text-blue-500">
+                            <span>Subtract (-)</span>
+                        </label>
+                        <label class="operation-btn flex items-center space-x-2 p-2 border rounded-md hover:bg-blue-50 cursor-pointer">
+                            <input type="radio" name="operation" value="MULTIPLY" class="text-blue-500">
+                            <span>Multiply (×)</span>
+                        </label>
+                        <label class="operation-btn flex items-center space-x-2 p-2 border rounded-md hover:bg-blue-50 cursor-pointer">
+                            <input type="radio" name="operation" value="DIVIDE" class="text-blue-500">
+                            <span>Divide (÷)</span>
+                        </label>
+                    </div>
+                    <p id="operationError" class="hidden text-red-500 text-xs mt-1">Please select an operation</p>
+                </div>
+
+                <div>
+                    <label class="block text-gray-700 text-sm font-bold mb-2" for="num2">Second Number <span class="text-red-500">*</span></label>
+                    <input type="number" th:field="*{num2}" id="num2" placeholder="Enter number" step="any" required
+                           class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    <p id="num2Error" class="hidden text-red-500 text-xs mt-1">Please enter a valid number</p>
+                    <p id="divideZeroError" class="hidden text-red-500 text-xs mt-1">Cannot divide by zero</p>
+                </div>
+
+                <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-md transition duration-200">
+                    Calculate
+                </button>
+                <input type="hidden" th:field="*{operation}" id="selectedOperation">
+            </form>
+        </div>
+
+
+        <!-- Chain Calculation Form -->
+        <div class="bg-white rounded-xl shadow-md overflow-hidden p-6">
+            <div th:if="${chainResult != null}" class="mb-6 p-4 bg-green-100 border-l-4 border-green-500 text-green-700 rounded">
+                <div class="flex items-center">
+                    <i class="fas fa-check-circle mr-2"></i>
+                    <span class="font-semibold">Chain Result: </span>
+                    <span th:text="${chainResult}"></span>
+                </div>
+            </div>
+            <h2 class="text-2xl font-bold text-gray-800 mb-6 text-center">Chain Operations</h2>
+            <form id="chainCalcForm" th:action="@{/ui/chain}" method="post" th:object="${chainRequest}" class="space-y-4">
+                <div>
+                    <label class="block text-gray-700 text-sm font-bold mb-2" for="initial">Initial Value <span class="text-red-500">*</span></label>
+                    <input type="number" th:field="*{initial}" id="initial" placeholder="Starting value" step="any" required
+                           class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    <p id="initialError" class="hidden text-red-500 text-xs mt-1">Please enter a valid number</p>
+                </div>
+
+                <div id="chainOperations">
+                    <div class="flex justify-between items-center mb-2">
+                        <label class="block text-gray-700 text-sm font-bold">Operations <span class="text-red-500">*</span></label>
+                        <button type="button" onclick="addOperationRow()" class="text-sm bg-blue-100 text-blue-600 px-2 py-1 rounded hover:bg-blue-200">
+                            <i class="fas fa-plus mr-1"></i>Add Operation
+                        </button>
+                    </div>
+
+                    <div class="space-y-3" id="operationRows">
+                        <!-- First operation row will be added by JavaScript -->
+                    </div>
+                    <p id="operationsError" class="hidden text-red-500 text-xs mt-1">Please add at least one operation</p>
+                </div>
+
+                <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-md transition duration-200">
+                    Calculate Chain
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- History Section -->
+    <div th:if="${history != null and !history.empty}" class="mt-12 bg-white rounded-xl shadow-md overflow-hidden p-6">
+        <div class="flex justify-between items-center mb-6">
+            <h2 class="text-2xl font-bold text-gray-800">Calculation History</h2>
+            <span class="text-sm text-gray-500">Showing last 10 operations</span>
+        </div>
+
+        <div class="space-y-4">
+            <div th:each="entry : ${history}" class="p-4 border rounded-lg hover:shadow transition">
+                <!-- Single Calculation Entry -->
+                <div th:if="${entry.type.name() == 'SINGLE'}" class="single-calculation">
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center space-x-4">
+                            <div class="text-lg font-semibold"
+                                 th:text="${entry.input.num1} + ' ' + ${entry.input.operation} + ' ' + ${entry.input.num2}"></div>
+                            <span class="text-blue-600 font-bold">= <span th:text="${entry.result}"></span></span>
+                        </div>
+                        <span class="text-sm text-gray-500" th:text="${#temporals.format(entry.timestamp, 'MMM dd, yyyy HH:mm')}"></span>
+                    </div>
+                </div>
+
+                <!-- Chain Calculation Entry -->
+            <div th:if="${entry.type.name() == 'CHAIN'}" class="chain-calculation">
+                <div th:if="${entry.input.getClass().simpleName == 'ChainRequest'}" class="chain-calculation">
+                    <div class="flex justify-between items-start mb-2">
+                        <div>
+                            <span class="font-semibold">Initial Value: </span>
+                            <span th:text="${entry.input.initial}"></span>
+                        </div>
+                        <span class="text-sm text-gray-500" th:text="${#temporals.format(entry.timestamp, 'MMM dd, yyyy HH:mm')}"></span>
+                    </div>
+
+                    <div class="ml-4 space-y-2">
+                        <div th:each="op,iter : ${entry.input.operations}" class="chain-row flex items-center space-x-4 p-2 rounded">
+                            <div class="w-8 text-right font-mono" th:text="${iter.index == 0 ? 'Start' : 'Then'}"></div>
+                            <div class="flex-1">
+                                <span th:text="${op} + ' with ' + ${entry.input.values[iter.index]}"></span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mt-3 pt-2 border-t">
+                        <span class="font-semibold">Final Result: </span>
+                        <span class="text-blue-600 font-bold" th:text="${entry.result}"></span>
+                    </div>
+                </div>
+            </div>
+            </div>
+        </div>
+    </div>
+</main>
+
+<footer class="bg-gray-800 text-white py-6 mt-12">
+    <div class="container mx-auto px-4 text-center">
+        <p>© 2023 eBay Calculator. All rights reserved.</p>
+    </div>
+</footer>
+
+<script>
+    // Add operation row dynamically for chain calculations
+    function addOperationRow() {
+        const container = document.getElementById('operationRows');
+        const index = container.children.length;
+
+        const row = document.createElement('div');
+        row.className = 'flex space-x-3 chain-row p-2 rounded';
+        row.innerHTML = `
+            <select name="operations" class="flex-1 px-3 py-2 border rounded-md focus:ring-blue-500 focus:border-blue-500" required>
+                <option value="">Select operation</option>
+                <option value="ADD">Add (+)</option>
+                <option value="SUBTRACT">Subtract (-)</option>
+                <option value="MULTIPLY">Multiply (×)</option>
+                <option value="DIVIDE">Divide (÷)</option>
+            </select>
+            <input type="number" name="values" step="any" required
+                   class="flex-1 px-3 py-2 border rounded-md focus:ring-blue-500 focus:border-blue-500" placeholder="Value">
+            <button type="button" onclick="this.parentNode.remove(); validateChainForm();"
+                    class="px-3 py-2 text-red-500 hover:text-red-700">
+                <i class="fas fa-times"></i>
+            </button>
+        `;
+        container.appendChild(row);
+        document.getElementById('operationsError').classList.add('hidden');
+    }
+
+    // Validate single calculation form
+    function validateSingleForm() {
+        let isValid = true;
+        const operationSelected = document.querySelector('#operationGroup input[type="radio"]:checked');
+        const num2 = document.getElementById('num2').value;
+        const operation = operationSelected ? operationSelected.value : '';
+
+        // Reset errors
+        document.getElementById('operationError').classList.add('hidden');
+        document.getElementById('num2Error').classList.add('hidden');
+        document.getElementById('divideZeroError').classList.add('hidden');
+
+        // Validate operation
+        if (!operationSelected) {
+            document.getElementById('operationError').classList.remove('hidden');
+            isValid = false;
+        }
+
+        // Validate division by zero
+        if (operation === 'DIVIDE' && parseFloat(num2) === 0) {
+            document.getElementById('divideZeroError').classList.remove('hidden');
+            isValid = false;
+        }
+
+        return isValid;
+    }
+
+    // Validate chain calculation form
+    function validateChainForm() {
+        let isValid = true;
+        const operationRows = document.getElementById('operationRows').children;
+
+        // Check if at least one operation exists
+        if (operationRows.length === 0) {
+            document.getElementById('operationsError').classList.remove('hidden');
+            return false;
+        }
+
+        // Validate each operation row
+        Array.from(operationRows).forEach(row => {
+            const operationSelect = row.querySelector('select');
+            const valueInput = row.querySelector('input[type="number"]');
+
+            if (!operationSelect.value) {
+                operationSelect.classList.add('input-error');
+                isValid = false;
+            } else {
+                operationSelect.classList.remove('input-error');
+            }
+
+            if (!valueInput.value) {
+                valueInput.classList.add('input-error');
+                isValid = false;
+            } else {
+                valueInput.classList.remove('input-error');
+            }
+
+            // Check for division by zero
+            if (operationSelect.value === 'DIVIDE' && parseFloat(valueInput.value) === 0) {
+                valueInput.classList.add('input-error');
+                isValid = false;
+            }
+        });
+
+        document.getElementById('operationsError').classList.toggle('hidden', isValid);
+        return isValid;
+    }
+
+    // Initialize forms
+    document.addEventListener('DOMContentLoaded', function() {
+        // Add first operation row for chain calculations
+        addOperationRow();
+
+        // Set up form validation
+        document.getElementById('singleCalcForm').addEventListener('submit', function(e) {
+            if (!validateSingleForm()) {
+                e.preventDefault();
+            }
+        });
+
+        document.getElementById('chainCalcForm').addEventListener('submit', function(e) {
+            if (!validateChainForm()) {
+                e.preventDefault();
+            }
+        });
+
+        // Clear operation error when any radio is selected
+        document.querySelectorAll('#operationGroup input[type="radio"]').forEach(radio => {
+            radio.addEventListener('change', function() {
+                document.getElementById('operationError').classList.add('hidden');
+            });
+        });
+    });
+        document.querySelectorAll('#operationGroup input[type="radio"]').forEach(radio => {
+        radio.addEventListener('change', function() {
+            document.getElementById('selectedOperation').value = this.value;
+        });
+    });
+</script>
+</body>
+</html>

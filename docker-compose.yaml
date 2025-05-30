@@ -1,0 +1,30 @@
+version: '3.8'
+
+services:
+  redis:
+    image: redis:7.2
+    container_name: redis
+    ports:
+      - "6379:6379"
+
+  jaeger:
+    image: jaegertracing/all-in-one:1.54
+    container_name: jaeger
+    ports:
+      - "16686:16686"   # UI
+      - "4317:4317"     # OTLP
+
+    environment:
+      COLLECTOR_OTLP_ENABLED: "true"
+
+  calculator:
+    build: .                                # Dockerfile in root
+    image: calculator-app
+    container_name: calculator
+    depends_on:
+      - redis
+      - jaeger
+    ports:
+      - "8080:8080"
+    env_file:
+      - .env

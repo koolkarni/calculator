@@ -1,0 +1,5 @@
+spring:
+  application:
+    name: calculator
+  profiles:
+    active: e2e  # or override via CLI or ENV

@@ -1,4 +1,8 @@
 package com.ebay.calculator.calculator.model;
 
-public class Operation {
+public enum Operation {
+    ADD,
+    SUBTRACT,
+    MULTIPLY,
+    DIVIDE
 }

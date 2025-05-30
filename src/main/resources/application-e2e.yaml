@@ -1,0 +1,30 @@
+spring:
+  redis:
+    host: localhost
+    port: 6379
+  web:
+    resources:
+      add-mappings: false  # Disable default resource handling
+  mvc:
+    throw-exception-if-no-handler-found: false  # Disable exception for missing handlers
+
+management:
+  tracing:
+    sampling:
+      probability: 1.0  # full trace sampling
+  metrics:
+    export:
+      otlp:
+        enabled: false
+      defaults:
+        enabled: false
+
+logging:
+  level:
+    root: INFO
+    com.ebay.calculator: INFO
+    org.springframework.web.servlet.resource: INFO
+    org.springframework.web.servlet.DispatcherServlet: INFO
+    org.springframework.web.servlet.PageNotFound: OFF
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n"
