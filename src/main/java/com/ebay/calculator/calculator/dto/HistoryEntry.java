@@ -8,7 +8,8 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class HistoryEntry {
-    private Object input;  // Can be SingleCalcRequest or ChainRequest
+    private Object input;         // hold actual DTO (SingleCalcRequest or ChainRequest)
+    private String inputType;     // "single" or "chain"
     private double result;
     private String timestamp;
 }

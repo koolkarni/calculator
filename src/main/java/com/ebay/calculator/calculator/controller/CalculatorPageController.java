@@ -45,10 +45,13 @@ public class CalculatorPageController {
     public String calculateSingle(@ModelAttribute("singleRequest") SingleCalcRequest request, Model model) {
         try {
             double result = calculator.calculate(request.getOperation(), request.getNum1(), request.getNum2());
-            log.info("Calculation successful: {} {} {} = {}",
-                    request.getNum1(), request.getOperation(), request.getNum2(), result);
+            log.info("Calculation successful: {} {} {} = {}", request.getNum1(), request.getOperation(), request.getNum2(), result);
             model.addAttribute("calculationResult", result);
             model.addAttribute("error", null);
+
+            // Save to history
+            String inputJson = new com.fasterxml.jackson.databind.ObjectMapper().writeValueAsString(request);
+            historyService.saveHistory("calculator:history", inputJson, "single", result);
         } catch (Exception e) {
             log.error("Calculation failed", e);
             model.addAttribute("error", e.getMessage());
@@ -58,18 +61,16 @@ public class CalculatorPageController {
 
     @PostMapping("/chain")
     public String calculateChain(@ModelAttribute("chainRequest") ChainRequest request, Model model) {
-        log.info("Received chain calculation request. Initial: {}, Operations count: {}",
-                request.getInitial(), request.getOperations().size());
-
+        log.info("Received chain calculation request. Initial: {}, Operations count: {}", request.getInitial(), request.getOperations().size());
         try {
-            double result = calculator.chain(
-                    request.getInitial(),
-                    request.getOperations(),
-                    request.getValues()
-            );
+            double result = calculator.chain(request.getInitial(), request.getOperations(), request.getValues());
             log.info("Chain calculation successful. Result: {}", result);
             model.addAttribute("chainResult", result);
             model.addAttribute("error", null);
+
+            // Save to history
+            String inputJson = new com.fasterxml.jackson.databind.ObjectMapper().writeValueAsString(request);
+            historyService.saveHistory("calculator:history", inputJson, "chain", result);
         } catch (Exception e) {
             log.error("Chain calculation failed for request: {}. Error: {}", request, e.getMessage(), e);
             model.addAttribute("error", e.getMessage());

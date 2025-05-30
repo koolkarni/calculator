@@ -1,6 +1,5 @@
 package com.ebay.calculator.calculator.service;
 
-import com.ebay.calculator.calculator.dto.ChainRequest;
 import com.ebay.calculator.calculator.dto.HistoryEntry;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -11,7 +10,6 @@ import org.springframework.stereotype.Service;
 
 import java.time.Instant;
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
@@ -24,21 +22,19 @@ public class HistoryService {
     private final ObjectMapper objectMapper = new ObjectMapper();
     private static final String HISTORY_KEY = "calculator:history";
 
-    public void saveHistory(String key, Object input, double result) {
+    public void saveHistory(String key, Object input, String inputType, double result) {
         try {
-            String value = objectMapper.writeValueAsString(new HistoryEntry(
-                    input,
-                    result,
-                    Instant.now().toString()
-            ));
-            redisTemplate.opsForList().leftPush(key, value);
+            HistoryEntry entry = new HistoryEntry();
+            entry.setInput(input); // Store as raw object, NOT JSON string
+            entry.setInputType(inputType);
+            entry.setResult(result);
+            entry.setTimestamp(Instant.now().toString());
+
+            String json = objectMapper.writeValueAsString(entry);
+            redisTemplate.opsForList().leftPush(key, json);
         } catch (JsonProcessingException e) {
             log.error("Failed to serialize history entry", e);
         }
-    }
-
-    public List<String> getHistory(String key, int count) {
-        return redisTemplate.opsForList().range(key, 0, count - 1);
     }
 
     public List<HistoryEntry> getRecent(int count) {
@@ -46,9 +42,9 @@ public class HistoryService {
         if (entries == null) return List.of();
 
         return entries.stream()
-                .map(entry -> {
+                .map(json -> {
                     try {
-                        return objectMapper.readValue(entry, HistoryEntry.class);
+                        return objectMapper.readValue(json, HistoryEntry.class);
                     } catch (JsonProcessingException e) {
                         log.error("Failed to deserialize history entry", e);
                         return null;
@@ -56,5 +52,9 @@ public class HistoryService {
                 })
                 .filter(Objects::nonNull)
                 .collect(Collectors.toList());
+    }
+
+    public List<String> getHistory(String key, int count) {
+        return redisTemplate.opsForList().range(key, 0, count - 1);
     }
 }
