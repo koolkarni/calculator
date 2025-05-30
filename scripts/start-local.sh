@@ -1,8 +1,8 @@
 #!/bin/bash
 cd "$(dirname "$0")/.."
 
-echo "Stopping and cleaning old containers..."
-docker compose down --volumes
+echo "Stopping Redis and Jaeger..."
+docker compose down --volumes --remove-orphans
 
-echo "Starting containers with build..."
-docker compose up --build -d
+echo "Starting Redis and Jaeger..."
+docker compose up -d redis jaeger

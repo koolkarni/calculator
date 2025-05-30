@@ -13,6 +13,10 @@ import java.util.Map;
 @Slf4j
 @ControllerAdvice
 public class GlobalExceptionHandler {
+    @ExceptionHandler(IllegalArgumentException.class)
+    public ResponseEntity<Map<String, Object>> handleIllegalArgument(IllegalArgumentException ex) {
+        return (ResponseEntity<Map<String, Object>>) buildErrorResponse(HttpStatus.BAD_REQUEST, ex.getMessage());
+    }
 
     @ExceptionHandler(UnsupportedOperationException.class)
     public ResponseEntity<?> handleUnsupportedOperation(UnsupportedOperationException ex) {

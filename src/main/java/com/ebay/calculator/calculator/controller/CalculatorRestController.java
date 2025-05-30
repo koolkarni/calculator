@@ -7,6 +7,7 @@ import com.ebay.calculator.calculator.service.Calculator;
 import com.ebay.calculator.calculator.service.HistoryService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.ResponseEntity;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
@@ -22,9 +23,12 @@ public class CalculatorRestController {
     private final HistoryService historyService;
 
     @PostMapping("/calculate")
-    public double calculate(@RequestBody SingleCalcRequest request) {
-        log.info("Single op: {}", request);
-        return calculator.calculate(request.getOperation(), request.getNum1(), request.getNum2());
+    public ResponseEntity<Double> calculate(@RequestBody SingleCalcRequest request) {
+        if (request.getOperation() == null) {
+            throw new IllegalArgumentException("Operation must not be null");
+        }
+        double result = calculator.calculate(request.getOperation(), request.getNum1(), request.getNum2());
+        return ResponseEntity.ok(result);
     }
 
     @PostMapping("/chain")
@@ -41,9 +45,14 @@ public class CalculatorRestController {
     }
 
     @PostMapping("/chain/threaded")
-    public List<Double> threadedChain(@RequestBody ThreadedChainRequest request) {
+    public ResponseEntity<List<Double>> threadedChain(@RequestBody ThreadedChainRequest request) {
+        if (request.getRequests() == null || request.getRequests().isEmpty()) {
+            throw new IllegalArgumentException("Requests list must not be empty");
+        }
+
         log.info("Parallel chain request: {} chains", request.getRequests().size());
-        return calculator.chainInParallel(request.getRequests());
+        List<Double> results = calculator.chainInParallel(request.getRequests());
+        return ResponseEntity.ok(results);
     }
 
     @GetMapping("/history")
